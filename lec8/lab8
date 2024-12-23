@@ -1,0 +1,90 @@
+def cumulative_mul(t):
+    """Mutates t so that each node's label becomes the product of its own
+    label and all labels in the corresponding subtree rooted at t.
+
+    >>> t = Tree(1, [Tree(3, [Tree(5)]), Tree(7)])
+    >>> cumulative_mul(t)
+    >>> t
+    Tree(105, [Tree(15, [Tree(5)]), Tree(7)])"""
+
+#当处理一个非叶节点时，你希望递归处理所有子节点，并且累积这些子节点的结果。但如果你在遇到叶节点时 return，会导致函数返回一个值，而不是继续执行递归逻辑的后续部分。
+#在这个递归函数中，你不需要返回任何值，因为你的目标是修改树的每个节点的 label，而不是在递归过程中依赖返回值。
+#在你这个具体的场景中，递归是通过副作用（也就是修改 t.label）来更新树的结构，
+#如果你希望通过递归函数的返回值来传递信息，通常会将递归调用嵌入到表达式中，这样每次递归都会返回一个值，而父节点可以通过这些返回值做计算。
+#另一种写法
+"""def cumulative_mul(t):
+    if t.is_leaf():
+        return t.label  # 叶节点返回自己的 label
+    else:
+        total_product = t.label  # 当前节点的 label
+        for b in t.branches:
+            total_product *= cumulative_mul(b)  # 累积子树的返回值
+        return total_product  # 返回总乘积
+"""
+
+def prune_small(t, n):
+    """Prune the tree mutatively, keeping only the n branches
+    of each node with the smallest labels.
+    #保留 n 个最小的分支
+    >>> t1 = Tree(6)
+    >>> prune_small(t1, 2)
+    >>> t1
+    Tree(6)
+    >>> t2 = Tree(6, [Tree(3), Tree(4)])
+    >>> prune_small(t2, 1)
+    >>> t2
+    Tree(6, [Tree(3)])
+    >>> t3 = Tree(6, [Tree(1), Tree(3, [Tree(1), Tree(2), Tree(3)]), Tree(5, [Tree(3), Tree(4)])])
+    >>> prune_small(t3, 2)
+    >>> t3
+    Tree(6, [Tree(1), Tree(3, [Tree(1), Tree(2)])])
+    """
+    for b in t.branches:
+        prune_small(b) ##应该递归调用 b。因为我们希望对树的每一个子树进行裁剪，而不是重复操作同一个节点。
+    #返回新列表版本
+    t.branches=sorted(t.branches,key=lambda b: b.label)
+    t.branches = t.branches[:n]
+    #在原地修改
+    t.branches.sort(key=lambda b: b.label)
+    del t.branches[n:]
+
+    #保留最小的 n 个分支意味着实际上要删除最大的 len(t.branches) - n 个分支。
+    while len(t.branches)>n:
+        largest = max(t.branches, key=label)
+        t.branches.remove(largest)
+    for b in t.branches :
+        prune_small()
+#while 只处理当前层的分支.for 循环递归处理子树.
+#保留最小的n个分支是对每一个结点而言的，比较是同一层比较的。保留也是同一层保留，不是整体保留最大的、最小的。
+#假设(2(2,3(7,8),7(3,4)))这么一个树，保留2个分支。针对根节点2而言，它的2个最小分支就是2,3.即使3下面的子树比7下面子树更大，也跟根节点无关。
+#而即使7,8比3,4大，因为它在根节点的比较中存活下来。同时数量也满足两个，就不删，不修剪。
+
+def delete(t, x):
+    """Remove all nodes labeled x below the root within Tree t. When a non-leaf
+    node is deleted, the deleted node's children become children of its parent.
+
+    The root node will never be removed.
+
+    >>> t = Tree(3, [Tree(2, [Tree(2), Tree(2)]), Tree(2), Tree(2, [Tree(2, [Tree(2), Tree(2)])])])
+    >>> delete(t, 2)
+    >>> t
+    Tree(3)
+    >>> t = Tree(1, [Tree(2, [Tree(4, [Tree(2)]), Tree(5)]), Tree(3, [Tree(6), Tree(2)]), Tree(4)])
+    >>> delete(t, 2)
+    >>> t
+    Tree(1, [Tree(4), Tree(5), Tree(3, [Tree(6)]), Tree(4)])
+    >>> t = Tree(1, [Tree(2, [Tree(4), Tree(5)]), Tree(3, [Tree(6), Tree(2)]), Tree(2, [Tree(6),  Tree(2), Tree(7), Tree(8)]), Tree(4)])
+    >>> delete(t, 2)
+    >>> t
+    Tree(1, [Tree(4), Tree(5), Tree(3, [Tree(6)]), Tree(6), Tree(7), Tree(8), Tree(4)])
+    """
+    new_branches = []
+    for b in t.branches :
+        delete(b,x)
+        if b.label == x: #extend用于展开并逐一添加子节点
+            new_branches.extend(b.branches) #我不需要把b删了再把子节点代替它的位置，我直接把子节点加进去就行了。
+        else:
+            new_branches.append(b)
+    t.branches = new_branches
+
+

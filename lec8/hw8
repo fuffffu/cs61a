@@ -1,0 +1,33 @@
+(define (ascending? s)
+    (if (or (null? s)(null? (cdr s))))#最后一个，和只剩最后一个都是对的
+        #t
+        (and (<= (car s)(car (cdt s))(ascending? (cdr s))))
+        #这里and 连接小于等于的条件 和 递归返回的条件。同时满足才会返回true
+#and规则保证所有条件为#t会返回#t，否则为#f。
+
+(define (my-filter pred s)
+    if (null? s) #f
+    (pred(car s))(cons (car s)(my-filter pred cdr(s)))
+    else
+    #只能cons后面同时递归，不然cons的东西会在下一次递归中消失
+(define (my-filter pred s)
+  (cond ((null? s) '()) ; 如果 s 是空列表，返回空列表
+        ((pred (car s)(cons (car s)my-filter pred (cdr s)) ) ; 如果 (pred (car s)) 为真
+        (else(my-filter pred (cdr s)))) ; 否则，忽略 (car s)，递归处理 (cdr s)))
+
+
+(define (interleave lst1 lst2)
+    (if (or (null? lst1) (null? lst2))
+        (append lst1 lst2)
+        (cons(car lst1)
+            cons((car lst2)
+                (interleave (cdt lst1)(cdr lst2)))))
+)
+#cons只能接受两个参数,一个是要添加的元素,另一个是目标列表.
+#cons部分其实是对应的else部分。
+
+(define (no-repeats s)
+    (if (null? s) s
+        (cons (car s)
+            (no-repeats(fliter (lambda (x) (not (=(car s)x))) cdr s))))
+)#x不等于car s 这是过滤条件。cdr这是要过滤的列表
