@@ -1,0 +1,44 @@
+class Account:
+    max_withdrawal = 10
+    interest = 0.02
+
+    def __init__(self, account_holder):
+        self.balance = 0
+        self.holder = account_holder
+
+    def deposit(self, amount):
+        self.balance = self.balance + amount
+        return self.balance
+
+    def withdraw(self, amount):
+        if amount > self.balance:
+            return "Insufficient funds"
+        if amount > self.max_withdrawal:
+            return "Can't withdraw that amount"
+        self.balance = self.balance - amount
+        return self.balance
+    
+    def time_to_retire(self, amount):#感觉又写复杂了
+        assert self.balance > 0 and amount > 0 and self.interest > 0
+        years=0
+        while amount >= self.balance:
+            self.balance+=self.balance*self.interest
+            years+=1
+        return years#采用递归没法控制好year初始化为0，每一次递归都会重新归零
+
+class FreeChecking(Account):
+    withdraw_fee = 1
+    free_withdrawals = 2
+    def withdraw(self, amount):
+        self.free_withdrawals-=1
+        if self.free_withdrawals>=0:
+            return super().withdraw(amount)#super会继承父类的功能
+        return super().withdraw(amount+self.withdraw_fee)
+
+def duplicate_link(s, val):
+    if s is Link.empty:
+        return s
+    if s.first==val:
+        #s=Link(s.first,val),我这种行为是创建了一个新列表，只有两个值
+    duplicate_link(s.rest,val)
+    #在当前节点后插入一个新节点，这个新节点的值是val，并且它的rest指向原来链表中的下一个节点。
